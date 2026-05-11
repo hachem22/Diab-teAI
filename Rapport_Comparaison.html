@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Comparatif — Justification du choix de XGBoost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --secondary: #06B6D4;
+            --accent: #22D3EE;
+            --dark: #0F172A;
+            --text: #1E293B;
+            --muted: #64748B;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --border: #E2E8F0;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--border);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+        .badge-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+        .badge-top::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+        }
+        h1 {
+            font-size: 38px;
+            color: var(--dark);
+            margin: 0 0 12px;
+            letter-spacing: -1px;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+        h1 .grad {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { color: var(--muted); font-size: 15px; margin: 0; }
+        h2 {
+            font-size: 24px;
+            color: var(--dark);
+            margin-top: 50px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h2 .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+        }
+        h3 {
+            font-size: 17px;
+            color: var(--dark);
+            margin-top: 26px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        p { font-size: 15px; color: var(--text); margin-bottom: 16px; }
+        ul, ol { margin-left: 0; padding-left: 24px; margin-bottom: 16px; }
+        li { font-size: 15px; color: var(--text); margin-bottom: 8px; }
+        code {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            font-family: 'Menlo', 'Consolas', monospace;
+        }
+        .highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(6, 182, 212, 0.06));
+            padding: 18px 22px;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+            font-size: 14.5px;
+        }
+        .warning {
+            background: rgba(245, 158, 11, 0.08);
+            padding: 18px 22px;
+            border-left: 4px solid var(--warning);
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+            font-size: 14.5px;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.08);
+            padding: 18px 22px;
+            border-left: 4px solid var(--success);
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+            font-size: 14.5px;
+        }
+        .img-container {
+            text-align: center;
+            margin: 36px 0;
+        }
+        .img-container img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+            border: 1px solid var(--border);
+        }
+        .img-caption {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 12px;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px 0;
+            font-size: 14.5px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--bg);
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(99, 102, 241, 0.02); }
+        td.win {
+            background: rgba(34, 197, 94, 0.08);
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .badge-best { background: var(--success); color: white; }
+        .badge-good { background: var(--primary); color: white; }
+        .badge-low { background: var(--muted); color: white; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 28px 0;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+        }
+        .metric-val {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .btn-print {
+            display: block;
+            width: 220px;
+            margin: 48px auto 0;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+        }
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 50px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        @media print {
+            .btn-print { display: none; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 30px; border: none; }
+        }
+        @media (max-width: 700px) {
+            .container { padding: 30px 20px; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="header">
+            <div class="badge-top">RAPPORT TECHNIQUE — DSO3</div>
+            <h1>Justification du choix de <span class="grad">XGBoost</span></h1>
+            <p class="subtitle">Comparaison rigoureuse de 6 algorithmes de classification binaire sur 100 000 patients</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-val">91.98%</div>
+                <div class="metric-label">Accuracy (test)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val">0.9432</div>
+                <div class="metric-label">ROC-AUC</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val">0.18%</div>
+                <div class="metric-label">Gap train/test</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val">&lt; 10ms</div>
+                <div class="metric-label">Inférence</div>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <b>Contexte (DSO3)</b> — Identifier si un patient est atteint de diabète à partir de ses caractéristiques cliniques et comportementales.<br>
+            <b>Données</b> — 80 000 patients en entraînement · 20 000 en test · split stratifié · <code>random_state=42</code>
+        </div>
+
+        <h2><span class="num">1</span>Comparaison des 6 algorithmes testés</h2>
+        <p>Tous les modèles ont été entraînés et évalués sur le <b>même jeu de test</b> de 20 000 patients pour garantir une comparaison équitable.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Modèle</th>
+                    <th>Accuracy</th>
+                    <th>ROC-AUC</th>
+                    <th>Verdict</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><b>XGBoost</b></td><td class="win">91.98 %</td><td class="win">0.9432</td><td><span class="badge badge-best">Retenu</span></td></tr>
+                <tr><td>Decision Tree</td><td>91.98 %</td><td>0.9431</td><td><span class="badge badge-good">Équivalent</span></td></tr>
+                <tr><td>Random Forest</td><td>91.97 %</td><td>0.9417</td><td><span class="badge badge-good">Équivalent</span></td></tr>
+                <tr><td>SVM (RBF)</td><td>88.41 %</td><td>0.9323</td><td><span class="badge badge-low">Acceptable</span></td></tr>
+                <tr><td>SVM (Polynomial)</td><td>87.78 %</td><td>0.9290</td><td><span class="badge badge-low">Acceptable</span></td></tr>
+                <tr><td>Naive Bayes</td><td>85.60 %</td><td>0.9209</td><td><span class="badge badge-low">Faible</span></td></tr>
+            </tbody>
+        </table>
+
+        <div class="img-container">
+            <img src="diagrams/01_dso3_model_comparison.png" alt="Comparaison des 6 modèles (Accuracy + ROC-AUC)">
+            <p class="img-caption">Visualisation des performances Accuracy et ROC-AUC — XGBoost se distingue par le meilleur AUC</p>
+        </div>
+
+        <div class="warning">
+            <b>Observation importante</b> — XGBoost, Decision Tree et Random Forest atteignent un score quasi identique (~91.98 %). Cela suggère que la cible <code>diagnosed_diabetes</code> est principalement déterminée par <b>une variable dominante</b> (l'analyse XAI confirme que <b>HbA1c représente 89.4 %</b> de l'importance totale). Les trois modèles convergent vers le même plafond statistique. Le choix de XGBoost se justifie alors par d'<b>autres critères</b> que la seule accuracy.
+        </div>
+
+        <h2><span class="num">2</span>Courbes ROC — Validation visuelle</h2>
+        <p>La <b>courbe ROC</b> (Receiver Operating Characteristic) mesure le compromis Vrais Positifs / Faux Positifs. L'<b>AUC</b> (aire sous la courbe) est l'indicateur roi en médecine prédictive : plus elle est proche de 1, meilleur est le modèle.</p>
+
+        <div class="img-container">
+            <img src="diagrams/03_roc_curves.png" alt="Courbes ROC des 3 modèles principaux">
+            <p class="img-caption">Courbes ROC — XGBoost (AUC=0.9432), Decision Tree (0.9431) et Random Forest (0.9427). Le coin supérieur gauche représente le modèle parfait.</p>
+        </div>
+
+        <h2><span class="num">3</span>Pourquoi XGBoost malgré l'égalité d'accuracy ?</h2>
+        <p>Quand plusieurs modèles atteignent la même précision, le choix se fait sur d'<b>autres critères techniques</b>. Voici les 5 raisons concrètes :</p>
+
+        <h3>3.1 — Gestion native des valeurs manquantes</h3>
+        <p>En production réelle, un patient peut ne pas avoir mesuré son HbA1c ou son insuline. XGBoost route automatiquement ces NaN dans une branche par défaut. Naive Bayes et SVM échouent sans imputation préalable.</p>
+
+        <h3>3.2 — <code>predict_proba</code> fiable et calibré</h3>
+        <p>XGBoost fournit un score de probabilité bien calibré, exploitable pour afficher au patient son <b>pourcentage de risque (0 à 100 %)</b> et non un simple oui/non. C'est ce qui alimente la jauge circulaire de l'application web.</p>
+
+        <h3>3.3 — Régularisation L1/L2 intégrée</h3>
+        <p>Les hyperparamètres <code>reg_alpha</code> (L1) et <code>reg_lambda</code> (L2) pénalisent les feuilles excessives. Combinés à <code>subsample=0.8</code> et <code>colsample_bytree=0.8</code>, ils créent un mécanisme de bagging intégré qui limite l'overfitting.</p>
+
+        <h3>3.4 — Vitesse et industrialisation</h3>
+        <p>XGBoost est multi-thread (<code>n_jobs=-1</code>), avec une sérialisation pickle légère. L'inférence prend <b>moins de 10 ms par patient</b>, compatible avec une API REST temps réel.</p>
+
+        <h3>3.5 — Robustesse aux outliers médicaux</h3>
+        <p>Les arbres de décision (et donc XGBoost) sont insensibles aux valeurs extrêmes (glycémies très élevées, HbA1c anormale). SVM et régression linéaire sont, à l'inverse, fortement perturbés par ces points.</p>
+
+        <h2><span class="num">4</span>Importance des variables (Explicabilité XAI)</h2>
+        <p>L'analyse de l'importance des features révèle une <b>dominance écrasante de l'HbA1c</b> dans la décision du modèle :</p>
+
+        <div class="img-container">
+            <img src="diagrams/05_feature_importance.png" alt="Importance des variables XGBoost">
+            <p class="img-caption">Top 12 des variables les plus discriminantes — HbA1c domine à 89.4 %</p>
+        </div>
+
+        <p>Ce résultat est <b>cohérent avec la médecine</b> : l'HbA1c (hémoglobine glyquée) est l'indicateur de référence pour le diagnostic du diabète depuis 2010 (American Diabetes Association). Le modèle a découvert par lui-même cette règle clinique.</p>
+
+        <h2><span class="num">5</span>Validation anti-overfitting</h2>
+        <p>Le gap entre l'accuracy train et test indique si le modèle <b>mémorise</b> les données ou <b>généralise</b> correctement :</p>
+
+        <div class="img-container">
+            <img src="diagrams/07_train_vs_test.png" alt="Train vs Test accuracy">
+            <p class="img-caption">Train = 92.16 % · Test = 91.97 % · Gap = 0.18 % → généralisation excellente</p>
+        </div>
+
+        <div class="success">
+            <b>✓ Aucun overfitting détecté</b> — Le gap de 0.18 % est très inférieur au seuil critique de 5 %. Le modèle généralise correctement aux nouvelles données.
+        </div>
+
+        <h2><span class="num">6</span>Matrice de confusion détaillée</h2>
+        <p>Sur les 20 000 patients de test, voici la répartition des prédictions correctes et erreurs :</p>
+
+        <div class="img-container">
+            <img src="diagrams/04_confusion_matrix.png" alt="Matrice de confusion XGBoost">
+            <p class="img-caption">Distribution équilibrée des Vrais Positifs / Vrais Négatifs — pas de biais évident vers une classe</p>
+        </div>
+
+        <h2><span class="num">7</span>Limites et points de vigilance</h2>
+
+        <div class="warning">
+            <b>Honnêteté méthodologique</b> — Ce rapport ne masque pas les faiblesses identifiées lors de l'audit :
+            <ul style="margin-top: 10px; margin-bottom: 0;">
+                <li><b>DSO2 (régression)</b> — XGBoost atteint R² = 0.9988, score anormalement élevé qui suggère que <code>diabetes_risk_score</code> est une <b>fonction quasi-déterministe</b> des autres variables (dataset synthétique). À confirmer par cross-validation.</li>
+                <li><b>DSO4 (multiclasse)</b> — L'accuracy de 91.65 % cache l'incapacité du modèle à détecter <i>Type 1</i> (39 patients) et <i>Gestational</i> (82 patients), avec F1-score = 0. <b>Correctif</b> : <code>class_weight='balanced'</code> ou exclusion de ces classes.</li>
+                <li><b>Dominance de l'HbA1c (89.4 %)</b> — La variable HbA1c écrase toutes les autres. Si elle manque chez un patient, la prédiction perd énormément en fiabilité. À documenter clairement dans l'usage clinique.</li>
+            </ul>
+        </div>
+
+        <h2><span class="num">8</span>Conclusion</h2>
+        <p>Le modèle <b>XGBoost</b> a été retenu pour la classification binaire (DSO3) et la régression (DSO2) car il offre :</p>
+        <ul>
+            <li><b>Performance</b> — Meilleur ROC-AUC (0.9432) parmi les 6 algorithmes testés</li>
+            <li><b>Fiabilité</b> — <code>predict_proba</code> calibré, idéal pour un score de risque continu</li>
+            <li><b>Robustesse</b> — Gestion native des NaN, insensibilité aux outliers, régularisation L1/L2</li>
+            <li><b>Industrialisation</b> — Inférence rapide (&lt; 10 ms), sérialisation pickle légère</li>
+            <li><b>Généralisation</b> — Gap train/test de 0.18 %, aucun overfitting détecté</li>
+        </ul>
+        <p>Pour la classification multiclasse (DSO4) du stade du diabète, <b>Random Forest</b> a été retenu (91.65 % d'accuracy) avec les hyperparamètres optimisés par GridSearchCV.</p>
+
+        <button class="btn-print" onclick="window.print()">📄 Imprimer / Exporter en PDF</button>
+
+        <div class="footer">
+            Rapport généré à partir du notebook <code>MachineLearning_Diabetes_Final.ipynb</code><br>
+            Module Machine Learning Appliqué · ESPRIT 2025-2026
+        </div>
+    </div>
+</body>
+</html>

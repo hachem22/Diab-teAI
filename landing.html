@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiabèteAI — L'IA au service de votre santé métabolique</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0B1020;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --accent: #6366F1;
+            --accent-2: #06B6D4;
+            --accent-3: #22D3EE;
+            --accent-glow: #818CF8;
+            --text-main: #F9FAFB;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --radius: 20px;
+            --radius-lg: 28px;
+            --font-main: 'Inter', sans-serif;
+            --shadow-glow: 0 30px 100px rgba(99, 102, 241, 0.25);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-main);
+            background: var(--bg-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(99, 102, 241, 0.25), transparent 50%),
+                radial-gradient(circle at 80% 90%, rgba(6, 182, 212, 0.2), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.08), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        main, nav, footer { position: relative; z-index: 1; }
+
+        /* === NAVBAR === */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 60px;
+            background: rgba(11, 16, 32, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+        .logo-icon svg { width: 22px; height: 22px; stroke: white; stroke-width: 2.5; fill: none; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--text-main); }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            font-family: var(--font-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+        .btn-ghost {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-strong);
+        }
+        .btn-ghost:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+
+        .btn-lg {
+            padding: 16px 32px;
+            font-size: 16px;
+            border-radius: 14px;
+        }
+
+        /* === HERO === */
+        .hero {
+            padding: 100px 60px 80px;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-glow);
+            margin-bottom: 28px;
+        }
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            box-shadow: 0 0 12px var(--accent-glow);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: clamp(38px, 7vw, 80px);
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1.05;
+            margin-bottom: 24px;
+        }
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--accent-glow), var(--accent-3), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p.subtitle {
+            font-size: clamp(16px, 2vw, 20px);
+            color: var(--text-muted);
+            max-width: 720px;
+            margin: 0 auto 40px;
+            font-weight: 400;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 800px;
+            margin: 80px auto 0;
+        }
+        .stat {
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+        .stat-val {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-glow), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* === SECTIONS === */
+        section {
+            padding: 100px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-tag {
+            color: var(--accent-glow);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        .section-header h2 {
+            font-size: clamp(30px, 5vw, 48px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 17px;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        /* === FEATURES === */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .feature {
+            padding: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .feature::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent);
+            opacity: 0;
+            transition: 0.4s;
+        }
+        .feature:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+        .feature:hover::before { opacity: 1; }
+        .feature > * { position: relative; }
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            display: grid;
+            place-items: center;
+            margin-bottom: 22px;
+        }
+        .feature-icon svg {
+            width: 26px;
+            height: 26px;
+            stroke: var(--accent-glow);
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .feature h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .feature p {
+            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        /* === MODEL SECTION === */
+        .model-section {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.08));
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            padding: 60px;
+            margin: 80px auto;
+            max-width: 1100px;
+        }
+        .model-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .model-left h2 {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .model-left p { color: var(--text-muted); font-size: 16px; margin-bottom: 16px; }
+        .model-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .metric-card {
+            padding: 24px;
+            background: rgba(11, 16, 32, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+        }
+        .metric-val {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-glow), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* === HOW IT WORKS === */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+        .step-card {
+            padding: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+        .step-num {
+            position: absolute;
+            top: -20px;
+            left: 36px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+        .step-card h3 {
+            font-size: 19px;
+            font-weight: 700;
+            margin-top: 14px;
+            margin-bottom: 10px;
+        }
+        .step-card p { color: var(--text-muted); font-size: 14.5px; }
+
+        /* === CTA === */
+        .cta-section {
+            text-align: center;
+            padding: 100px 40px;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15), transparent 70%);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-top: 80px;
+        }
+        .cta-section h2 {
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.15;
+        }
+        .cta-section p {
+            color: var(--text-muted);
+            font-size: 17px;
+            margin-bottom: 36px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* === FOOTER === */
+        footer {
+            padding: 40px 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--accent-glow); text-decoration: none; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 900px) {
+            .navbar { padding: 16px 24px; }
+            .nav-links { display: none; }
+            .hero { padding: 60px 24px 40px; }
+            .hero-stats { grid-template-columns: repeat(2, 1fr); }
+            section { padding: 60px 24px; }
+            .features, .steps { grid-template-columns: 1fr; }
+            .model-section { padding: 36px 24px; }
+            .model-grid { grid-template-columns: 1fr; gap: 32px; }
+            footer { padding: 24px; }
+        }
+
+        /* === Reveal animation === */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        DiabèteAI
+    </div>
+    <div class="nav-links">
+        <a href="#features">Fonctionnalités</a>
+        <a href="#model">Modèle IA</a>
+        <a href="#process">Processus</a>
+        <a class="btn btn-primary" href="predict.html">Lancer un bilan →</a>
+    </div>
+</nav>
+
+<main>
+    <section class="hero">
+        <div class="badge">
+            <div class="badge-dot"></div>
+            Propulsé par XGBoost · 100 000 patients analysés
+        </div>
+        <h1>
+            L'<span class="gradient-text">intelligence artificielle</span><br>
+            au service de votre <span class="gradient-text">santé métabolique</span>
+        </h1>
+        <p class="subtitle">
+            Découvrez en moins de 30 secondes votre profil de risque de diabète grâce à un modèle entraîné sur 100 000 patients et 18 indicateurs clés.
+        </p>
+        <div class="hero-actions">
+            <a href="predict.html" class="btn btn-primary btn-lg">
+                Démarrer mon bilan gratuit
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="#features" class="btn btn-ghost btn-lg">En savoir plus</a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat"><div class="stat-val">100K</div><div class="stat-label">Patients analysés</div></div>
+            <div class="stat"><div class="stat-val">91.98%</div><div class="stat-label">Accuracy du modèle</div></div>
+            <div class="stat"><div class="stat-val">0.94</div><div class="stat-label">ROC-AUC</div></div>
+            <div class="stat"><div class="stat-val">&lt; 30s</div><div class="stat-label">Pour obtenir un bilan</div></div>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="section-header reveal">
+            <div class="section-tag">Fonctionnalités</div>
+            <h2>Une analyse complète,<br>pensée pour vous</h2>
+            <p>Notre IA évalue chaque indicateur de votre profil pour offrir une estimation précise et personnalisée.</p>
+        </div>
+        <div class="features">
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                </div>
+                <h3>Modèle Gradient Boosting</h3>
+                <p>XGBoost — algorithme leader dans les compétitions Kaggle de santé. Robuste face aux données déséquilibrées et aux valeurs manquantes.</p>
+            </div>
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <h3>Résultats instantanés</h3>
+                <p>Une prédiction calculée en moins d'une seconde, avec score de risque, jauge dynamique et verdict clair.</p>
+            </div>
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"></path></svg>
+                </div>
+                <h3>18 indicateurs analysés</h3>
+                <p>Glycémie, HbA1c, IMC, tension, antécédents familiaux, mode de vie… une vue à 360° de votre santé métabolique.</p>
+            </div>
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <h3>100% confidentiel</h3>
+                <p>Aucune donnée n'est enregistrée ni transmise à un tiers. Tout fonctionne localement sur votre machine.</p>
+            </div>
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <h3>Tableau de bord visuel</h3>
+                <p>Une jauge circulaire animée et un verdict clair vous accompagnent dans l'interprétation du résultat.</p>
+            </div>
+            <div class="feature reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <h3>Export PDF</h3>
+                <p>Téléchargez votre bilan au format PDF pour le partager avec votre médecin traitant.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="model">
+        <div class="model-section reveal">
+            <div class="model-grid">
+                <div class="model-left">
+                    <span class="model-badge">⚡ MODÈLE EN PRODUCTION</span>
+                    <h2>XGBoost Classifier — Le choix de la performance</h2>
+                    <p>Après comparaison de 6 algorithmes (Decision Tree, Random Forest, Naive Bayes, SVM RBF, SVM Poly), XGBoost ressort comme le meilleur compromis entre précision, robustesse et vitesse d'inférence.</p>
+                    <p style="margin-top: 24px;"><strong style="color: var(--text-main);">Pourquoi XGBoost ?</strong> Tolère les valeurs manquantes nativement, gère le déséquilibre 60/40 des classes, capture les interactions non-linéaires entre variables médicales, et s'entraîne 10× plus vite qu'un Random Forest équivalent.</p>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card"><div class="metric-val">91.98%</div><div class="metric-label">Accuracy (test)</div></div>
+                    <div class="metric-card"><div class="metric-val">0.9432</div><div class="metric-label">ROC-AUC</div></div>
+                    <div class="metric-card"><div class="metric-val">300</div><div class="metric-label">Estimators</div></div>
+                    <div class="metric-card"><div class="metric-val">4</div><div class="metric-label">Profondeur max</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="process">
+        <div class="section-header reveal">
+            <div class="section-tag">Processus</div>
+            <h2>Comment ça fonctionne ?</h2>
+            <p>Trois étapes simples pour obtenir un bilan métabolique complet en moins de 30 secondes.</p>
+        </div>
+        <div class="steps">
+            <div class="step-card reveal">
+                <div class="step-num">1</div>
+                <h3>Renseignez vos données</h3>
+                <p>Profil, bilan sanguin, tension et habitudes de vie. Un formulaire guidé en 4 étapes, conçu pour être rempli en moins de 2 minutes.</p>
+            </div>
+            <div class="step-card reveal">
+                <div class="step-num">2</div>
+                <h3>L'IA analyse</h3>
+                <p>Le modèle XGBoost compare votre profil à 100 000 patients pour identifier les corrélations et le niveau de risque associé.</p>
+            </div>
+            <div class="step-card reveal">
+                <div class="step-num">3</div>
+                <h3>Recevez votre bilan</h3>
+                <p>Un verdict clair, un score de probabilité animé, et la possibilité d'exporter votre résultat en PDF pour votre médecin.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section reveal">
+        <h2>Prêt à connaître votre profil de risque ?</h2>
+        <p>L'analyse est gratuite, anonyme et prend moins de 30 secondes.</p>
+        <a href="predict.html" class="btn btn-primary btn-lg">
+            Démarrer maintenant
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+    </section>
+</main>
+
+<footer>
+    <p>© 2026 DiabèteAI · Projet académique · Modèle entraîné avec <a href="#">XGBoost</a> sur 100 000 patients</p>
+    <p style="margin-top: 8px; font-size: 12px; color: var(--text-dim);">⚠️ Cet outil ne remplace pas un diagnostic médical professionnel.</p>
+</footer>
+
+<script>
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    reveals.forEach(r => io.observe(r));
+</script>
+
+</body>
+</html>
